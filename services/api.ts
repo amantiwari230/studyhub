@@ -1,6 +1,9 @@
 import { Note, PdfFile, Link, YoutubeVideo } from '../types';
 
-const API_URL = 'http://localhost:5000';
+// In Vite, environment variables are accessed via import.meta.env
+// PROD: If VITE_API_URL is set (e.g. on Render), use it.
+// DEV: fallback to localhost:5000.
+const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000';
 
 // Helper to simulate network delay for mock mode
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -9,8 +12,6 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const generateId = () => Date.now();
 
 // --- MOCK DATA HANDLERS (LocalStorage) ---
-// This ensures the app is functional in the preview environment even without the Node backend running.
-
 const getLocalStorage = <T>(key: string): T[] => {
   const data = localStorage.getItem(key);
   return data ? JSON.parse(data) : [];
@@ -22,7 +23,6 @@ const setLocalStorage = <T>(key: string, data: T[]) => {
 
 // --- API WRAPPERS ---
 
-// GENERIC FETCHER
 async function fetchWithFallback<T>(endpoint: string, storageKey: string): Promise<T[]> {
   try {
     const res = await fetch(`${API_URL}${endpoint}`);
@@ -49,15 +49,13 @@ async function postWithFallback<T>(endpoint: string, storageKey: string, data: a
   } catch (err) {
     console.warn(`Backend unreachable (${endpoint}), saving to LocalStorage.`);
     const current = getLocalStorage<any>(storageKey);
-    // Simulate return object
     let newItem: any;
     
     if (endpoint.includes('pdf')) {
-       // Mock PDF upload
        newItem = { 
          id: generateId(), 
          title: data.get('title'), 
-         file_path: '#', // Cannot store real file in localstorage easily
+         file_path: '#', 
          created_at: new Date().toISOString() 
        };
     } else {
@@ -69,7 +67,7 @@ async function postWithFallback<T>(endpoint: string, storageKey: string, data: a
     }
     
     setLocalStorage(storageKey, [...current, newItem]);
-    await delay(500); // Fake network delay
+    await delay(500); 
     return newItem;
   }
 }
