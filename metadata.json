@@ -1,0 +1,5 @@
+{
+  "name": "StudyHub",
+  "description": "A centralized study materials manager for PDFs, notes, links, and videos.",
+  "requestFramePermissions": []
+}
