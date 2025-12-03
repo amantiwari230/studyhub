@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Tab, Note, PdfFile, Link, YoutubeVideo } from './types';
-import { api } from './services/api';
+import { api, API_URL } from './services/api';
 import { Card } from './components/Card';
 import { Modal } from './components/Modal';
 import { Plus, BookOpen, FileText, Link as LinkIcon, Youtube, Layout } from 'lucide-react';
@@ -179,10 +179,10 @@ const App: React.FC = () => {
                title={item.title}
                subtitle={`Added: ${new Date(item.created_at).toLocaleDateString()}`}
                type="pdf"
-               linkUrl={`http://localhost:5000/${item.file_path}`} 
-               onDownload={() => window.open(api.pdfs.getDownloadUrl(item.id), '_self')}
+               linkUrl={`${API_URL}/${item.file_path}`} 
+               onDownload={() => window.open(api.pdfs.getDownloadUrl(item.id), '_blank')}
                onDelete={() => handleDelete(item.id)}
-               onClick={() => window.open(`http://localhost:5000/${item.file_path}`, '_blank')}
+               onClick={() => window.open(`${API_URL}/${item.file_path}`, '_blank')}
              />
           ))}
 

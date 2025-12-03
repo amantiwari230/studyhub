@@ -3,7 +3,7 @@ import { Note, PdfFile, Link, YoutubeVideo } from '../types';
 // In Vite, environment variables are accessed via import.meta.env
 // PROD: If VITE_API_URL is set (e.g. on Render), use it.
 // DEV: fallback to localhost:5000.
-const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000';
+export const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000';
 
 // Helper to simulate network delay for mock mode
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
