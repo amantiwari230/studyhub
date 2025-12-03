@@ -139,6 +139,24 @@ app.post('/pdf/upload', upload.single('pdf'), (req, res) => {
   });
 });
 
+app.get('/pdf/download/:id', (req, res) => {
+  db.get('SELECT file_path, title FROM pdfs WHERE id = ?', req.params.id, (err, row) => {
+    if (err || !row) return res.status(404).json({ error: 'PDF not found' });
+    
+    const filePath = path.join(__dirname, row.file_path);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).send("File not found on server storage.");
+    }
+
+    // Sanitize filename for download
+    const safeTitle = row.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const extension = path.extname(row.file_path);
+    const downloadName = `${safeTitle}${extension}`;
+
+    res.download(filePath, downloadName);
+  });
+});
+
 app.delete('/pdf/:id', (req, res) => {
   // First get file path to delete from disk
   db.get('SELECT file_path FROM pdfs WHERE id = ?', req.params.id, (err, row) => {
@@ -146,7 +164,11 @@ app.delete('/pdf/:id', (req, res) => {
     
     const filePath = path.join(__dirname, row.file_path);
     if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+      try {
+        fs.unlinkSync(filePath);
+      } catch (e) {
+        console.error("Error deleting file:", e);
+      }
     }
 
     db.run('DELETE FROM pdfs WHERE id = ?', req.params.id, function(err) {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trash2, ExternalLink, FileText, Video } from 'lucide-react';
+import { Trash2, ExternalLink, FileText, Video, Download } from 'lucide-react';
 
 interface CardProps {
   title: string;
@@ -9,9 +9,10 @@ interface CardProps {
   linkUrl?: string;
   onDelete: () => void;
   onClick?: () => void;
+  onDownload?: () => void;
 }
 
-export const Card: React.FC<CardProps> = ({ title, subtitle, type, imageUrl, linkUrl, onDelete, onClick }) => {
+export const Card: React.FC<CardProps> = ({ title, subtitle, type, imageUrl, linkUrl, onDelete, onClick, onDownload }) => {
   return (
     <div 
       className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow duration-200 group flex flex-col h-full"
@@ -52,12 +53,22 @@ export const Card: React.FC<CardProps> = ({ title, subtitle, type, imageUrl, lin
             {type}
           </span>
           <div className="flex items-center gap-2">
+            {onDownload && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onDownload(); }}
+                className="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-full transition-colors"
+                title="Download"
+              >
+                <Download size={16} />
+              </button>
+            )}
             {linkUrl && (
               <a 
                 href={linkUrl} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-full transition-colors"
+                title="Open Link"
               >
                 <ExternalLink size={16} />
               </a>
@@ -65,6 +76,7 @@ export const Card: React.FC<CardProps> = ({ title, subtitle, type, imageUrl, lin
             <button 
               onClick={(e) => { e.stopPropagation(); onDelete(); }}
               className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+              title="Delete"
             >
               <Trash2 size={16} />
             </button>

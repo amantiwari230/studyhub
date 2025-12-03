@@ -91,6 +91,7 @@ export const api = {
     getAll: () => fetchWithFallback<PdfFile>('/pdf/all', 'pdfs'),
     upload: (formData: FormData) => postWithFallback<PdfFile>('/pdf/upload', 'pdfs', formData),
     delete: (id: number) => deleteWithFallback('/pdf', 'pdfs', id),
+    getDownloadUrl: (id: number) => `${API_URL}/pdf/download/${id}`
   },
   notes: {
     getAll: () => fetchWithFallback<Note>('/notes', 'notes'),

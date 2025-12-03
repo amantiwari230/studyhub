@@ -180,6 +180,7 @@ const App: React.FC = () => {
                subtitle={`Added: ${new Date(item.created_at).toLocaleDateString()}`}
                type="pdf"
                linkUrl={`http://localhost:5000/${item.file_path}`} 
+               onDownload={() => window.open(api.pdfs.getDownloadUrl(item.id), '_self')}
                onDelete={() => handleDelete(item.id)}
                onClick={() => window.open(`http://localhost:5000/${item.file_path}`, '_blank')}
              />
