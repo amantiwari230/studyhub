@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Trash2, ExternalLink, FileText, Video, Download } from 'lucide-react';
 
@@ -6,13 +7,22 @@ interface CardProps {
   subtitle?: string; // date or content preview
   type: 'pdf' | 'note' | 'link' | 'youtube';
   imageUrl?: string;
-  linkUrl?: string;
+  linkUrl?: string; // URL for "View" / External Link
+  downloadUrl?: string; // Specific URL for "Download"
   onDelete: () => void;
-  onClick?: () => void;
-  onDownload?: () => void;
+  onClick?: () => void; // Main card click action
 }
 
-export const Card: React.FC<CardProps> = ({ title, subtitle, type, imageUrl, linkUrl, onDelete, onClick, onDownload }) => {
+export const Card: React.FC<CardProps> = ({ 
+  title, 
+  subtitle, 
+  type, 
+  imageUrl, 
+  linkUrl, 
+  downloadUrl,
+  onDelete, 
+  onClick 
+}) => {
   return (
     <div 
       className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow duration-200 group flex flex-col h-full"
@@ -32,6 +42,7 @@ export const Card: React.FC<CardProps> = ({ title, subtitle, type, imageUrl, lin
           <div className="flex items-center gap-2 text-brand-600">
              {type === 'pdf' && <FileText size={18} />}
              {type === 'link' && <ExternalLink size={18} />}
+             {type === 'note' && <FileText size={18} />}
           </div>
         </div>
 
@@ -53,26 +64,38 @@ export const Card: React.FC<CardProps> = ({ title, subtitle, type, imageUrl, lin
             {type}
           </span>
           <div className="flex items-center gap-2">
-            {onDownload && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onDownload(); }}
+            
+            {/* Download Button (For PDFs) */}
+            {downloadUrl && (
+              <a
+                href={downloadUrl}
+                // Don't use target=_blank for downloads if the server sets Content-Disposition: attachment,
+                // but using it is safer to prevent page navigation if server fails.
+                target="_blank" 
+                rel="noopener noreferrer"
                 className="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-full transition-colors"
                 title="Download"
+                onClick={(e) => e.stopPropagation()}
               >
                 <Download size={16} />
-              </button>
+              </a>
             )}
+
+            {/* View/External Link Button */}
             {linkUrl && (
               <a 
                 href={linkUrl} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-full transition-colors"
-                title="Open Link"
+                title={type === 'pdf' ? 'View in Browser' : 'Open Link'}
+                onClick={(e) => e.stopPropagation()}
               >
                 <ExternalLink size={16} />
               </a>
             )}
+
+            {/* Delete Button */}
             <button 
               onClick={(e) => { e.stopPropagation(); onDelete(); }}
               className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"

@@ -1,6 +1,5 @@
+
 import sqlite3 from 'sqlite3';
-import fs from 'fs';
-import path from 'path';
 
 // Ensure the database file location exists
 const dbPath = './studyhub.db';
@@ -16,10 +15,12 @@ const db = new sqlite3.Database(dbPath, (err) => {
 
 function initializeTables() {
   db.serialize(() => {
-    // PDFs Table
+    // PDFs Table - Updated for secure file handling
     db.run(`CREATE TABLE IF NOT EXISTS pdfs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
+      original_name TEXT NOT NULL,
+      stored_name TEXT NOT NULL,
       file_path TEXT NOT NULL,
       created_at TEXT NOT NULL
     )`);

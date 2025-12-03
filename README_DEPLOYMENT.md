@@ -1,66 +1,63 @@
-# StudyHub Deployment Guide
 
-This project consists of a React Frontend and a Node.js/Express Backend with SQLite.
+# StudyHub - Deployment Guide
 
-## 1. Local Development
+A robust, deployment-ready application for managing study materials (PDFs, Notes, Links, Videos).
+
+## 1. Project Overview
+- **Frontend**: React (Vite) + Tailwind CSS
+- **Backend**: Node.js + Express
+- **Database**: SQLite (File-based)
+- **Storage**: Local filesystem (`server/uploads`)
+
+## 2. Local Development
 
 ### Backend
-1. Navigate to the `/server` directory (create it if you copied the files).
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the server:
-   ```bash
-   npm start
-   ```
-   The server will run on `http://localhost:5000`.
+1. Open a terminal in the root.
+2. Navigate to server: `cd server`
+3. Install dependencies: `npm install`
+4. Start server: `npm start`
+   - Server runs on `http://localhost:5000`
+   - Uploads stored in `server/uploads`
+   - SQLite DB file created automatically
 
 ### Frontend
-1. Navigate to the root directory.
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the dev server:
-   ```bash
-   npm run dev
-   ```
-4. **Note:** The frontend `services/api.ts` is configured to try `http://localhost:5000` first. If the backend is not running, it falls back to **LocalStorage** so you can test the UI immediately.
+1. Open a new terminal in the root.
+2. Install dependencies: `npm install`
+3. Start React: `npm run dev`
+4. Open the link provided by Vite (e.g., `http://localhost:5173`)
 
-## 2. Deployment (Render.com example)
+## 3. Deployment Configuration (Critical)
 
-Since this app uses SQLite (a file-based DB), typical serverless deployment (Vercel/Netlify) won't persist data between restarts unless you use a mounted volume. **Render** is recommended for this setup using a "Web Service".
+Since this app serves files dynamically, you must configure Environment Variables correctly in your deployment platform.
 
-### Steps for Render:
-1. Create a GitHub repository with structure:
-   ```
-   /client (frontend code)
-   /server (backend code)
-   ```
-2. **Deploy Backend:**
-   - Create a new **Web Service** on Render connected to your repo.
-   - Root Directory: `server`
-   - Build Command: `npm install`
-   - Start Command: `node server.js`
-   - **Important:** Add a *Disk* in Render settings and mount it to `/server/uploads` and ensure the database file is stored there or initialized there to persist data.
+### Backend (e.g., Render.com)
+Deploy the `/server` folder as a **Web Service**.
+- **Build Command**: `npm install`
+- **Start Command**: `node server.js`
+- **Environment Variables**:
+  - `PORT`: `5000` (or let platform decide)
+  - `BASE_URL`: **REQUIRED**. The public URL of your backend.
+    - Example: `https://studyhub-api.onrender.com`
+    - *Why?* This is used to construct the absolute URLs for file downloads so they work from anywhere.
+- **Persistent Storage**:
+  - Because SQLite and Uploads are files, you **MUST** mount a persistent disk (Volume) to `/server/uploads` and `/server` (or wherever DB is) if using a service like Render, otherwise your data will disappear on every restart.
 
-3. **Deploy Frontend:**
-   - Create a **Static Site** on Render.
-   - Root Directory: `client` (or root)
-   - Build Command: `npm run build`
-   - Publish Directory: `dist`
-   - **Environment Variable:** Set `VITE_API_URL` (or modify `api.ts`) to point to your deployed backend URL (e.g., `https://my-api.onrender.com`).
+### Frontend (e.g., Vercel / Netlify)
+Deploy the root (or `/client` if separated) as a static site.
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Environment Variables**:
+  - `VITE_API_BASE`: **REQUIRED**. The full URL to your backend API.
+    - Example: `https://studyhub-api.onrender.com/api`
+    - *Note:* Do not forget the `/api` suffix if your backend is configured that way (our server.js uses `/api` prefix).
 
-## 3. Project Structure
-```
-/
-├── components/       # React UI Components
-├── services/         # API Service (Frontend)
-├── server/           # Backend Code
-│   ├── uploads/      # PDF storage
-│   ├── database.js   # SQLite config
-│   └── server.js     # Express API
-├── App.tsx           # Main Frontend Logic
-└── types.ts          # TypeScript interfaces
-```
+## 4. Troubleshooting Downloads
+
+If you see "Site can't be reached" when downloading:
+1. Ensure the Backend is running.
+2. Check that `BASE_URL` in backend env vars matches the actual running server URL.
+3. Check that the file actually exists in `server/uploads`.
+
+## 5. Security Notes for Production
+- The current setup allows any PDF upload up to 20MB.
+- `cors` is enabled for all origins (`*`). For production, restrict this to your frontend domain in `server/server.js`.

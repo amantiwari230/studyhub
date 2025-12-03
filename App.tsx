@@ -1,9 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tab, Note, PdfFile, Link, YoutubeVideo } from './types';
-import { api, API_URL } from './services/api';
+import { api } from './services/api';
 import { Card } from './components/Card';
 import { Modal } from './components/Modal';
 import { Plus, BookOpen, FileText, Link as LinkIcon, Youtube, Layout } from 'lucide-react';
+
+// Extending the interface locally to include the new fields from backend
+interface ExtendedPdfFile extends PdfFile {
+  fileUrl?: string;     // Absolute URL for viewing
+  downloadUrl?: string; // Absolute URL for downloading
+}
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.NOTES);
@@ -12,7 +19,7 @@ const App: React.FC = () => {
 
   // Data State
   const [notes, setNotes] = useState<Note[]>([]);
-  const [pdfs, setPdfs] = useState<PdfFile[]>([]);
+  const [pdfs, setPdfs] = useState<ExtendedPdfFile[]>([]);
   const [links, setLinks] = useState<Link[]>([]);
   const [videos, setVideos] = useState<YoutubeVideo[]>([]);
 
@@ -69,7 +76,8 @@ const App: React.FC = () => {
       resetForm();
       fetchData();
     } catch (error) {
-      alert("Failed to save item. Check console.");
+      alert("Failed to save item. Ensure backend is running!");
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -86,6 +94,7 @@ const App: React.FC = () => {
       fetchData();
     } catch (e) {
       console.error(e);
+      alert("Failed to delete item.");
     }
   };
 
@@ -139,7 +148,7 @@ const App: React.FC = () => {
         </nav>
 
         <div className="pt-6 border-t border-slate-100">
-           <p className="text-xs text-slate-400 text-center">v1.0.0 &copy; 2024</p>
+           <p className="text-xs text-slate-400 text-center">v2.0.0 &copy; 2024</p>
         </div>
       </aside>
 
@@ -179,10 +188,12 @@ const App: React.FC = () => {
                title={item.title}
                subtitle={`Added: ${new Date(item.created_at).toLocaleDateString()}`}
                type="pdf"
-               linkUrl={`${API_URL}/${item.file_path}`} 
-               onDownload={() => window.open(api.pdfs.getDownloadUrl(item.id), '_blank')}
+               // Used for "View" (Open in new tab, let browser handle it)
+               linkUrl={item.fileUrl} 
+               // Used for "Download" (Forces save dialog)
+               downloadUrl={item.downloadUrl}
                onDelete={() => handleDelete(item.id)}
-               onClick={() => window.open(`${API_URL}/${item.file_path}`, '_blank')}
+               onClick={() => item.fileUrl && window.open(item.fileUrl, '_blank')}
              />
           ))}
 
@@ -286,7 +297,7 @@ const App: React.FC = () => {
                 />
                 <FileText className="text-slate-400 mb-2" size={32} />
                 <span className="text-sm text-slate-600 font-medium">{file ? file.name : "Click to upload PDF"}</span>
-                <span className="text-xs text-slate-400 mt-1">Maximum size 10MB</span>
+                <span className="text-xs text-slate-400 mt-1">Maximum size 20MB</span>
               </div>
             </div>
           )}
